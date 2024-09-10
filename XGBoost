@@ -1,0 +1,57 @@
+import xgboost as xgb
+from sklearn.model_selection import train_test_split, RandomizedSearchCV
+from sklearn.metrics import mean_squared_error
+import pandas as pd
+from scipy.stats import uniform, randint
+
+# Assuming the data is loaded in a DataFrame 'df'
+X = df.drop(columns=['charges'])
+y = df['charges']
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Define the XGBRegressor
+xgb_model = xgb.XGBRegressor(random_state=42)
+
+# Define the hyperparameter grid for tuning
+param_dist = {
+    'learning_rate': uniform(0.01, 0.5),        # range between 0.01 and 0.5
+    'n_estimators': randint(50, 200),           # range between 50 and 200 estimators
+    'max_depth': randint(3, 10),                # depth between 3 and 10
+    'alpha': uniform(0, 1),                     # L1 regularization from 0 to 1
+    'reg_lambda': uniform(0.1, 1),              # L2 regularization between 0.1 and 1
+    'gamma': uniform(0, 0.5),                   # gamma between 0 and 0.5
+    'subsample': uniform(0.6, 1),               # subsample between 0.6 and 1
+    'colsample_bytree': uniform(0.6, 1),        # fraction of features for tree
+    'colsample_bylevel': uniform(0.6, 1),       # fraction of features per level
+    'colsample_bynode': uniform(0.6, 1),        # fraction of features per node
+}
+
+# Set up the RandomizedSearchCV
+random_search = RandomizedSearchCV(
+    estimator=xgb_model,
+    param_distributions=param_dist,
+    n_iter=100,  # number of parameter settings sampled
+    scoring='neg_mean_squared_error',
+    cv=3,        # 3-fold cross-validation
+    verbose=2,
+    random_state=42,
+    n_jobs=-1    # Use all available cores
+)
+
+# Perform the search
+random_search.fit(X_train, y_train)
+
+# Print the best parameters found
+print(f"Best parameters: {random_search.best_params_}")
+
+# Predict with the best estimator
+best_model = random_search.best_estimator_
+y_pred = best_model.predict(X_test)
+
+# Evaluate the performance
+mse = mean_squared_error(y_test, y_pred)
+rmse = mse ** 0.5
+
+print(f"Root Mean Squared Error after tuning: {rmse}")

@@ -1,0 +1,65 @@
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import statsmodels.api as sm
+import numpy as np
+import pandas as pd
+
+# Split the dataset
+X = df.drop(columns=['charges'])
+y = df['charges']
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Define the Random Forest model with the given parameters
+rf_model = RandomForestRegressor(
+    n_estimators=70,
+    criterion='squared_error',
+    max_features=None,
+    max_depth=4,
+    min_samples_split=2,
+    min_samples_leaf=1,
+    random_state=42
+)
+
+# Train the model
+rf_model.fit(X_train, y_train)
+
+# Predict with the trained model
+y_pred = rf_model.predict(X_test)
+
+
+
+
+# Evaluate the model
+# Compute metrics
+mae = mean_absolute_error(y_test, y_pred)
+mse = mean_squared_error(y_test, y_pred)
+rmse = np.sqrt(mse)
+r2 = r2_score(y_test, y_pred)
+
+# Calculate Adjusted R²
+n = len(y_test)
+p = X_test.shape[1]
+adjusted_r2 = 1 - (1 - r2) * (n - 1) / (n - p - 1)
+
+# Calculate MAPE (Mean Absolute Percentage Error)
+mape = np.mean(np.abs((y_test - y_pred) / y_test)) * 100
+
+# Calculate AIC and BIC using statsmodels
+# Add a constant to the model (intercept)
+X_train_sm = sm.add_constant(X_train)
+model_sm = sm.OLS(y_train, X_train_sm).fit()
+aic = model_sm.aic
+bic = model_sm.bic
+
+# Display all metrics
+print(f"AIC: {aic}")
+print(f"BIC: {bic}")
+print(f"Adjusted R²: {adjusted_r2}")
+print(f"MAE: {mae}")
+print(f"MAPE: {mape}")
+print(f"MSE: {mse}")
+print(f"R²: {r2}")
+print(f"RMSE: {rmse}")

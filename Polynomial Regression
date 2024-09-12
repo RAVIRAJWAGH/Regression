@@ -1,0 +1,31 @@
+from sklearn.preprocessing import PolynomialFeatures
+
+df22=df2.drop('charges',axis=1) #Numberical columns
+print(df22.columns)
+
+# Tranforming Featrues into polynomial degree
+poly=PolynomialFeatures(
+    degree = 5,
+    interaction_only = False,
+    include_bias = False
+)
+
+X_poly=poly.fit_transform(df22)
+X_poly=pd.DataFrame(X_poly)
+X_poly1=pd.concat([df1,X_poly],axis=1)
+X_poly1.columns=X_poly1.columns.map(str)
+
+types=[ type(i) for i in X_poly1.columns if type(i)!=str]
+print('types of column : ',types)
+
+print(X_poly.shape)
+print(X_poly1.shape)
+print(y.shape)
+
+X_train_1, X_test_1, y_train_1, y_test_1 = train_test_split(X_poly1, y, test_size=0.3, random_state=42)
+
+print(f'''
+shape of X_train : {X_train_1.shape}
+shape of X_test : {X_test_1.shape}
+shape of y_train : {y_train_1.shape}
+shape of y_test : {y_test_1.shape}''')

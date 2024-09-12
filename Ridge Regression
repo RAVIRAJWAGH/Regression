@@ -1,0 +1,60 @@
+from sklearn.linear_model import Ridge
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import numpy as np
+import pandas as pd
+
+
+# Initialize SVM Classifier with specified parameters
+model = Ridge(
+    alpha=3.0,
+    fit_intercept=True,
+    max_iter=5
+)
+# Train the model
+model.fit(X_train, y_train)
+
+# Predict on the test set
+y_pred = model.predict(X_test)
+
+# Evaluate the model
+# Compute metrics
+mae = mean_absolute_error(y_test, y_pred)
+mse = mean_squared_error(y_test, y_pred)
+rmse = np.sqrt(mse)
+r2 = r2_score(y_test, y_pred)
+
+# Calculate Adjusted R²
+n = len(y_test)
+p = X_test.shape[1]
+k = X_test.shape[1] + 1
+
+adjusted_r2 = 1 - (1 - r2) * (n - 1) / (n - p - 1)
+
+# Calculate MAPE (Mean Absolute Percentage Error)
+mape = np.mean(np.abs((y_test - y_pred) / y_test)) * 100
+
+# Display all metrics
+print('----------------------------')
+print('jupyter Results :')
+calculate_aic_bic(n,mse, k)
+print(f"Adjusted R²: {adjusted_r2}")
+print(f"MAE: {mae}")
+print(f"MAPE: {mape}")
+print(f"MSE: {mse}")
+print(f"R²: {r2}")
+print(f"RMSE: {rmse}")
+
+print('----------------------------')
+print('Comparision with Rubi : ')
+print('''
+AIC 50949.4069
+Adjusted R Square 0.4387
+BIC 51015.477
+MAE 3092.1697
+MAPE 35.8964
+MSE 23577473.8095
+R Square 0.4408
+RMSE 4855.6641
+''')
+print('----------------------------')
